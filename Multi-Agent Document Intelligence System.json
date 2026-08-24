@@ -1,0 +1,1052 @@
+{
+  "name": "Multi-Agent Document Intelligence System",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "document-intelligence",
+        "responseMode": "responseNode",
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "id": "dda9a88a-41fc-408a-b852-93d749897bca",
+      "name": "Upload Documents Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        1024
+      ],
+      "webhookId": "ce4bbb2d-9aab-4283-8f09-a86ebd034207"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract text from uploaded documents\nconst items = $input.all();\nconst extractedDocs = [];\n\nfor (let i = 0; i < items.length; i++) {\n  const item = items[i];\n  const binary = item.binary?.data;\n  \n  if (binary) {\n    extractedDocs.push({\n      json: {\n        documentId: `document_${i + 1}`,\n        fileName: binary.fileName || `file_${i + 1}`,\n        mimeType: binary.mimeType,\n        fileSize: binary.fileSize,\n        extractedText: \"Sample extracted text from document. This would contain the actual document content after OCR/parsing.\"\n      },\n      binary: {\n        data: binary\n      }\n    });\n  }\n}\n\nreturn extractedDocs;"
+      },
+      "id": "7c01a907-3fbc-4a6d-8d60-d61fc25d6559",
+      "name": "Extract Document Text",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        1024
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.extractedText }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a Document Classification Supervisor AI Agent.\n\nYour task is to analyze uploaded documents and classify them into the following categories:\n- Financial: Financial reports, budgets, invoices, revenue data\n- Legal: Contracts, agreements, compliance documents, legal notices\n- Research: Research papers, studies, academic documents, whitepapers\n- HR: Resumes, job descriptions, employee records, HR policies\n- Technical: Technical documentation, API docs, architecture diagrams, code documentation\n- Medical: Medical records, prescriptions, health reports\n- General Business: Business plans, proposals, general correspondence\n\nFor each document, provide:\n1. documentId (from input)\n2. documentType (one of the categories above)\n3. assignedAgent (e.g., \"Finance Agent\", \"Legal Agent\", \"Research Agent\", \"HR Agent\", \"Technical Agent\")\n4. confidence (0-1 score)\n5. reasoning (brief explanation)\n\nReturn a JSON array with classifications for all documents."
+        }
+      },
+      "id": "e75914b2-8e5e-4c43-b06d-9f921bf5b84a",
+      "name": "Supervisor AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        688,
+        1024
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "ba4f32f1-8d38-4e3a-8b42-8265240cf8d1",
+      "name": "OpenAI Model - Supervisor",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        704,
+        1248
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "2GEUrYmcQwmQTwyR",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": {
+          "classifications": [
+            {
+              "documentId": "document_1",
+              "documentType": "Financial",
+              "assignedAgent": "Finance Agent",
+              "confidence": 0.95,
+              "reasoning": "Contains financial metrics and revenue data"
+            }
+          ]
+        }
+      },
+      "id": "8c310a52-34bc-4e2d-9540-da789316e642",
+      "name": "Supervisor Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        832,
+        1248
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.classifications[0].assignedAgent }}",
+                    "rightValue": "Finance Agent",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "943f8ea3-0c09-4655-beff-1749a6b48d2a"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Finance"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.classifications[0].assignedAgent }}",
+                    "rightValue": "Legal Agent",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "01c7ec39-e1c5-4018-91a8-7bdfb67a1acb"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Legal"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.classifications[0].assignedAgent }}",
+                    "rightValue": "Research Agent",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "3e955e65-0717-4ec2-8a4b-9565cdcea6f3"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Research"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.classifications[0].assignedAgent }}",
+                    "rightValue": "HR Agent",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "120ad698-e83c-430d-806f-70cd5313bb99"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "HR"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.classifications[0].assignedAgent }}",
+                    "rightValue": "Technical Agent",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "42c145fe-3fb8-4111-911a-da0e1b928e77"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Technical"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "195022a5-08d9-4817-b7f9-592de8469226",
+      "name": "Route to Specialized Agents",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1040,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $(\"Extract Document Text\").item.json.extractedText }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a Financial Analysis AI Agent specialized in:\n- KPI extraction (revenue, profit, expenses, margins, growth rates)\n- Revenue analysis and breakdown\n- Trend forecasting and pattern identification\n- Fraud and anomaly detection\n- Financial summary generation\n\nAnalyze the financial document and provide structured output with:\n1. kpis: Array of key performance indicators with names, values, and changes\n2. revenue_analysis: Detailed revenue breakdown and insights\n3. trends: Array of identified trends and forecasts\n4. anomalies: Any detected irregularities or red flags\n5. summary: Executive summary of financial health\n\nBe precise with numbers and provide actionable insights."
+        }
+      },
+      "id": "ead6a582-c058-4068-b9f4-6f462fa75f38",
+      "name": "Finance Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1264,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "id": "581e2fdf-a4fb-4844-91d7-213393614960",
+      "name": "OpenAI Model - Finance",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1280,
+        336
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "2GEUrYmcQwmQTwyR",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": {
+          "kpis": [
+            {
+              "name": "Revenue",
+              "value": "5.2M",
+              "change": "+25%"
+            }
+          ],
+          "revenue_analysis": "Detailed revenue breakdown",
+          "trends": [
+            "Growth trend",
+            "Market expansion"
+          ],
+          "anomalies": [],
+          "summary": "Financial health summary"
+        }
+      },
+      "id": "cb328581-c0f7-4bd6-be28-ef6fc391de54",
+      "name": "Finance Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1408,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "numberInputs": 5
+      },
+      "id": "cd88307d-5fe7-47f0-b0a0-7d078e54f774",
+      "name": "Merge All Agent Results",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1680,
+        960
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $(\"Extract Document Text\").item.json.extractedText }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a Legal Analysis AI Agent specialized in:\n- Contract analysis and interpretation\n- Key clause extraction (terms, conditions, obligations)\n- Compliance checking against standard practices\n- Risk identification and assessment\n- Obligation extraction for all parties\n\nAnalyze the legal document and provide structured output with:\n1. contract_type: Type of legal document\n2. key_clauses: Array of important clauses with details\n3. compliance_status: Assessment of compliance\n4. risks: Identified legal risks or concerns\n5. obligations: List of obligations for each party\n6. summary: Executive summary of the legal document\n\nFocus on actionable legal insights and potential issues."
+        }
+      },
+      "id": "cc1b94ea-4f11-4c30-8748-967f2fb578c2",
+      "name": "Legal Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1264,
+        912
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "9fe0740b-f617-462a-a3ed-ae842eb57fd3",
+      "name": "OpenAI Model - Legal",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1280,
+        1136
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "2GEUrYmcQwmQTwyR",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": {
+          "contract_type": "Employment Agreement",
+          "key_clauses": [
+            {
+              "clause": "Non-compete",
+              "details": "12 months restriction"
+            }
+          ],
+          "compliance_status": "Compliant",
+          "risks": [],
+          "obligations": [
+            "Salary payment",
+            "Benefits provision"
+          ],
+          "summary": "Contract analysis summary"
+        }
+      },
+      "id": "bda16387-b285-4926-907e-497063eaad01",
+      "name": "Legal Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1408,
+        1136
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $(\"Extract Document Text\").item.json.extractedText }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a Research Analysis AI Agent specialized in:\n- Research paper summarization\n- Trend analysis and pattern identification\n- Citation extraction and validation\n- Strategic insight generation\n- Academic content evaluation\n\nAnalyze the research document and provide structured output with:\n1. research_topic: Main topic or focus area\n2. summary: Comprehensive summary of the research\n3. key_findings: Array of major findings and conclusions\n4. citations: Extracted citations with authors and years\n5. trends: Identified research trends and directions\n6. strategic_insights: Actionable insights for business or academic application\n\nFocus on extracting valuable knowledge and future implications."
+        }
+      },
+      "id": "36ae8715-0852-478b-b77a-33935802a604",
+      "name": "Research Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1264,
+        1824
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "id": "4c89c3ad-59e2-451c-87dc-640bcce26cdd",
+      "name": "OpenAI Model - Research",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1280,
+        2048
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "2GEUrYmcQwmQTwyR",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": {
+          "research_topic": "Multi-agent AI systems",
+          "summary": "Research summary",
+          "key_findings": [
+            "Finding 1",
+            "Finding 2"
+          ],
+          "citations": [
+            {
+              "author": "Smith et al.",
+              "year": 2023
+            }
+          ],
+          "trends": [
+            "Emerging trend 1"
+          ],
+          "strategic_insights": [
+            "Insight 1"
+          ]
+        }
+      },
+      "id": "3eae740f-d44d-4c9e-b83e-7eb2830472ec",
+      "name": "Research Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1408,
+        2048
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $(\"Extract Document Text\").item.json.extractedText }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an HR Analysis AI Agent specialized in:\n- Resume and CV analysis\n- Candidate scoring and evaluation\n- Skill extraction and categorization\n- Job matching and recommendations\n- Experience assessment\n\nAnalyze the HR document and provide structured output with:\n1. candidate_name: Name of the candidate\n2. skills: Array of identified skills and competencies\n3. experience_years: Total years of relevant experience\n4. education: Educational background\n5. score: Overall candidate score (0-100)\n6. job_match: Recommended job role or position\n7. summary: Candidate evaluation summary\n\nProvide objective assessment based on qualifications and experience."
+        }
+      },
+      "id": "4eb10b5e-8391-46ed-b312-2ab6f146c9f3",
+      "name": "HR Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1264,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "id": "c8efb9a6-4497-4d8c-8400-27f5e9337596",
+      "name": "OpenAI Model - HR",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1280,
+        736
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "2GEUrYmcQwmQTwyR",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": {
+          "candidate_name": "John Doe",
+          "skills": [
+            "Python",
+            "Machine Learning"
+          ],
+          "experience_years": 5,
+          "education": "MS Computer Science",
+          "score": 85,
+          "job_match": "Senior AI Engineer",
+          "summary": "Candidate evaluation summary"
+        }
+      },
+      "id": "2b16d7d3-24f0-41a7-824e-0345b45a019d",
+      "name": "HR Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1408,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $(\"Extract Document Text\").item.json.extractedText }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a Technical Documentation AI Agent specialized in:\n- Technical document summarization\n- API and endpoint extraction\n- Architecture pattern identification\n- Code and documentation analysis\n- Technology stack identification\n\nAnalyze the technical document and provide structured output with:\n1. document_type: Type of technical document\n2. technologies: Array of technologies and frameworks mentioned\n3. architecture: Identified architecture pattern\n4. apis: Extracted API endpoints and specifications\n5. code_snippets: Important code examples or patterns\n6. summary: Technical documentation summary\n\nFocus on extracting actionable technical information."
+        }
+      },
+      "id": "b9f875d4-9cc7-4c02-b3fb-f1ae26a3de94",
+      "name": "Technical Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1264,
+        1312
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "id": "e03fe18c-3a00-4333-9ea9-c1ed79167d49",
+      "name": "OpenAI Model - Technical",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1280,
+        1536
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "2GEUrYmcQwmQTwyR",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": {
+          "document_type": "API Documentation",
+          "technologies": [
+            "REST API",
+            "OAuth 2.0"
+          ],
+          "architecture": "Microservices",
+          "apis": [
+            {
+              "name": "User API",
+              "endpoint": "/api/users"
+            }
+          ],
+          "code_snippets": [],
+          "summary": "Technical documentation summary"
+        }
+      },
+      "id": "7876302b-c16b-48ac-927b-ffdb5b31bc10",
+      "name": "Technical Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1408,
+        1536
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($input.all()) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the Final Synthesis AI Agent responsible for creating a comprehensive executive report.\n\nYou will receive outputs from multiple specialized agents (Finance, Legal, Research, HR, Technical).\n\nYour task is to synthesize all information and generate:\n\n1. executive_summary: High-level overview combining insights from all agents\n2. key_insights: Array of the most important findings across all documents\n3. risks: Consolidated list of risks identified by any agent\n4. opportunities: Business opportunities and strategic advantages identified\n5. recommendations: Actionable recommendations based on all analyses\n6. conclusion: Final conclusion and next steps\n\nCreate a cohesive narrative that connects insights across different document types.\nPrioritize cross-functional insights and strategic implications."
+        }
+      },
+      "id": "8fd20469-b0c5-4a4a-8b50-b8de33c19ea7",
+      "name": "Final Synthesis Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1840,
+        1024
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "id": "effaa969-83ba-4a22-afc8-85e9ca34c48d",
+      "name": "OpenAI Model - Synthesis",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1856,
+        1248
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "2GEUrYmcQwmQTwyR",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": {
+          "executive_summary": "High-level overview of all documents",
+          "key_insights": [
+            "Insight 1",
+            "Insight 2"
+          ],
+          "risks": [
+            "Risk 1"
+          ],
+          "opportunities": [
+            "Opportunity 1"
+          ],
+          "recommendations": [
+            "Recommendation 1"
+          ],
+          "conclusion": "Final conclusion"
+        }
+      },
+      "id": "3cff5000-7ef5-49c6-b631-a00055e7f212",
+      "name": "Synthesis Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1984,
+        1248
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate comprehensive final report\nconst synthesis = $input.first().json.output;\n\nconst report = {\n  reportTitle: \"Multi-Agent Document Intelligence Report\",\n  generatedAt: new Date().toISOString(),\n  documentCount: 3,\n  \n  executiveSummary: synthesis.executive_summary,\n  \n  keyInsights: synthesis.key_insights,\n  \n  risks: synthesis.risks,\n  \n  opportunities: synthesis.opportunities,\n  \n  recommendations: synthesis.recommendations,\n  \n  conclusion: synthesis.conclusion,\n  \n  detailedAnalysis: {\n    finance: $('Finance Agent').first()?.json?.output || {},\n    legal: $('Legal Agent').first()?.json?.output || {},\n    research: $('Research Agent').first()?.json?.output || {},\n    hr: $('HR Agent').first()?.json?.output || {},\n    technical: $('Technical Agent').first()?.json?.output || {}\n  },\n  \n  metadata: {\n    workflowName: \"Multi-Agent Document Intelligence System\",\n    processingTime: \"Completed\",\n    agentsUsed: [\"Supervisor\", \"Finance\", \"Legal\", \"Research\", \"HR\", \"Technical\", \"Synthesis\"]\n  }\n};\n\nreturn [{ json: report }];"
+      },
+      "id": "9e5b69b9-a442-4b5b-999d-bf2331299ca2",
+      "name": "Generate Final Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2192,
+        1024
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "34a6597f-fc56-4a83-80ea-00179dd57b17",
+      "name": "Send Report Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2416,
+        1024
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Upload Documents Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Document Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Document Text": {
+      "main": [
+        [
+          {
+            "node": "Supervisor AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supervisor AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Route to Specialized Agents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Model - Supervisor": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Supervisor AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supervisor Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Supervisor AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route to Specialized Agents": {
+      "main": [
+        [
+          {
+            "node": "Finance Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Legal Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Research Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HR Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Technical Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Finance Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge All Agent Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Model - Finance": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Finance Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Finance Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Finance Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge All Agent Results": {
+      "main": [
+        [
+          {
+            "node": "Final Synthesis Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Legal Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge All Agent Results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "OpenAI Model - Legal": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Legal Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Legal Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Legal Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge All Agent Results",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "OpenAI Model - Research": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HR Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge All Agent Results",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "OpenAI Model - HR": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "HR Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HR Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "HR Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Technical Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge All Agent Results",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "OpenAI Model - Technical": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Technical Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Technical Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Technical Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final Synthesis Agent": {
+      "main": [
+        [
+          {
+            "node": "Generate Final Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Model - Synthesis": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Final Synthesis Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Synthesis Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Final Synthesis Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Final Report": {
+      "main": [
+        [
+          {
+            "node": "Send Report Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6d12b2c1-53ff-4719-a7f1-c41d7b02d6c8",
+  "meta": {
+    "instanceId": "55d621006124db1f302354fad7546d58172dbc17f1a939a960f0c18aa10b284e"
+  },
+  "id": "zEMCTMHjWXyxVVCf",
+  "tags": []
+}

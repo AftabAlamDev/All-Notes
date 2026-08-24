@@ -1,0 +1,241 @@
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\usepackage{hyperref}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{titlesec}
+\usepackage{enumitem}
+
+\setdefaultlanguage{english}
+\setotherlanguages{hindi}
+\newfontfamily\hindifont{Noto Serif Devanagari}
+\newfontfamily\punjabifont[Script=Gurmukhi]{Noto Sans Gurmukhi}
+
+\title{AI Admission OS for CBITSS\\
+\large AI-Powered Counselling, Calling and Student Relationship Management}
+\author{Prepared By: Aftab Alam -- AI Developer}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Executive Summary}
+This proposal presents an AI-powered Admission Operating System for CBITSS.
+The system automates counselling, voice calls, WhatsApp communication,
+lead qualification, appointment scheduling, follow-ups, and CRM reporting.
+
+\section{Objectives}
+\begin{itemize}
+\item Provide 24/7 admission counselling.
+\item Reduce counsellor workload.
+\item Increase lead conversion.
+\item Improve student experience.
+\item Establish CBITSS as an AI-driven institution.
+\end{itemize}
+
+\section{Core Features}
+
+\subsection{AI Voice Receptionist}
+The AI answers incoming calls, greets students, and captures inquiry details.
+
+Example:
+\begin{quote}
+``Hello, welcome to CBITSS. How can I help you today?''
+\end{quote}
+
+\subsection{Career Counselling}
+The AI collects:
+\begin{itemize}
+\item Education background
+\item Interests
+\item Budget
+\item Career goals
+\item Preferred timings
+\end{itemize}
+
+It recommends suitable courses.
+
+\subsection{FAQ Assistant}
+Answers questions regarding:
+\begin{itemize}
+\item Fees
+\item Placement assistance
+\item Course duration
+\item Trainers
+\item Certifications
+\end{itemize}
+
+\subsection{WhatsApp Automation}
+Automatically sends:
+\begin{itemize}
+\item Brochures
+\item Syllabus PDFs
+\item Demo schedules
+\item Fee details
+\item Location details
+\end{itemize}
+
+\subsection{Appointment Booking}
+Integrates with Google Calendar and Outlook.
+
+\subsection{Follow-Ups}
+Automated campaigns:
+\begin{itemize}
+\item Day 1: Thank-you message
+\item Day 3: Demo reminder
+\item Day 7: Batch reminder
+\item Day 14: Final follow-up
+\end{itemize}
+
+\section{Multilingual AI Counsellor}
+
+Supported Languages:
+\begin{itemize}
+\item English
+\item Hindi
+\item Punjabi
+\end{itemize}
+
+English:
+\begin{quote}
+Hello, welcome to CBITSS.
+\end{quote}
+
+Hindi:
+\begin{quote}
+{\hindifont नमस्ते, CBITSS में आपका स्वागत है।}
+\end{quote}
+
+Punjabi:
+\begin{quote}
+{\punjabifont ਸਤ ਸ੍ਰੀ ਅਕਾਲ, CBITSS ਵਿੱਚ ਤੁਹਾਡਾ ਸੁਆਗਤ ਹੈ।}
+\end{quote}
+
+The AI can also handle Hinglish and mixed-language conversations.
+
+\section{Multi-Agent Architecture}
+
+\subsection{Reception Agent}
+Handles incoming calls and lead capture.
+
+\subsection{Counselling Agent}
+Provides career guidance.
+
+\subsection{Admission Agent}
+Explains fees and enrollment.
+
+\subsection{Follow-Up Agent}
+Manages reminders and nurturing.
+
+\subsection{Manager Agent}
+Provides reports and analytics.
+
+\section{Technology Stack}
+
+\begin{itemize}
+\item Backend: Python, FastAPI
+\item Workflow: n8n
+\item LLMs: OpenAI, Gemini, Claude
+\item Voice: Vapi, Retell AI, Twilio
+\item Messaging: WhatsApp Business API
+\item Database: MySQL, PostgreSQL
+\item Vector DB: Qdrant, Chroma, Pinecone
+\end{itemize}
+
+\section{Lead Scoring}
+
+\begin{tabular}{|p{8cm}|c|}
+\hline
+Criteria & Score \\
+\hline
+Admission within 7 days & 30 \\
+Budget available & 20 \\
+Demo interest & 25 \\
+Working professional & 10 \\
+Website engagement & 15 \\
+\hline
+\end{tabular}
+
+\bigskip
+
+Hot Leads: 80--100
+
+Warm Leads: 50--79
+
+Cold Leads: Below 50
+
+\section{CRM Dashboard}
+
+Features:
+\begin{itemize}
+\item Total leads
+\item Conversion rates
+\item Call recordings
+\item Counsellor performance
+\item Student journey tracking
+\end{itemize}
+
+\section{Implementation Roadmap}
+
+\subsection{Phase 1}
+\begin{itemize}
+\item Website chatbot
+\item FAQ knowledge base
+\item WhatsApp integration
+\end{itemize}
+
+\subsection{Phase 2}
+\begin{itemize}
+\item Voice calling
+\item Appointment scheduling
+\item CRM dashboard
+\end{itemize}
+
+\subsection{Phase 3}
+\begin{itemize}
+\item Multi-agent orchestration
+\item Analytics
+\item Advanced automation
+\end{itemize}
+
+\section{Budget Estimation}
+
+\begin{tabular}{|p{7cm}|p{4cm}|}
+\hline
+Component & Approximate Monthly Cost \\
+\hline
+OpenAI/Gemini APIs & INR 5,000--15,000 \\
+Voice Platform (Vapi/Retell) & INR 5,000--20,000 \\
+Twilio & INR 2,000--10,000 \\
+WhatsApp API & INR 2,000--8,000 \\
+Cloud Hosting & INR 2,000--5,000 \\
+Database/Vector DB & INR 1,000--5,000 \\
+\hline
+Estimated Total & INR 15,000--50,000 \\
+\hline
+\end{tabular}
+
+\section{Future Vision}
+
+After successful deployment at CBITSS, this solution can evolve into a SaaS platform for:
+\begin{itemize}
+\item Coaching institutes
+\item Colleges
+\item Universities
+\item Study abroad consultants
+\end{itemize}
+
+\section{Conclusion}
+
+AI Admission OS can transform admissions by providing multilingual counselling,
+automated communication, and intelligent follow-up while improving efficiency
+and student satisfaction.
+
+\end{document}

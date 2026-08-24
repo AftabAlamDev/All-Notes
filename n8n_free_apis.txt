@@ -1,0 +1,35 @@
+Free APIs for n8n Testing
+
+1. JSONPlaceholder (Dummy Data)
+GET https://jsonplaceholder.typicode.com/posts
+
+2. Random User API
+GET https://randomuser.me/api/
+
+3. Bored API
+GET https://www.boredapi.com/api/activity
+
+4. Dog API
+GET https://dog.ceo/api/breeds/image/random
+
+5. Advice Slip API
+GET https://api.adviceslip.com/advice
+
+6. REST Countries API
+GET https://restcountries.com/v3.1/name/india
+
+
+Example n8n HTTP Request Setup:
+
+Method: GET
+URL: https://api.adviceslip.com/advice
+
+Workflow Example:
+
+Trigger
+ ↓
+API Request
+ ↓
+Process Data
+ ↓
+Save / Email / Post
