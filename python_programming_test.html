@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python Programming Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef1f6; --panel:#ffffff; --ink:#0f1729; --muted:#5b6577;
+  --line:#dfe4ec; --blue:#2563a8; --blue-deep:#173a63; --blue-soft:#e7f0fa;
+  --yellow:#f2c14e; --yellow-deep:#c9962a;
+  --green:#1f9d67; --green-soft:#e3f5ec; --red:#d84c46; --red-soft:#fbe8e7;
+  --code-bg:#0f1b2d; --code-ink:#d7e2f2; --code-key:#f2c14e; --code-str:#7fd1a5;
+  --shadow:0 1px 2px rgba(15,23,41,.06),0 8px 30px rgba(15,23,41,.08);
+  --radius:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  background:
+    radial-gradient(1100px 500px at 88% -10%, #dbe6f4 0%, transparent 60%),
+    radial-gradient(900px 500px at -5% 105%, #e6eaf2 0%, transparent 55%),
+    var(--bg);
+  color:var(--ink); line-height:1.55; -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+.wrap{max-width:1060px;margin:0 auto;padding:26px 20px 70px}
+.screen{display:none;animation:fade .35s ease}
+.screen.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+code,pre,.mono{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
+
+/* ---------- brand mark ---------- */
+.brand{display:flex;align-items:center;gap:12px}
+.chip{
+  font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;
+  color:#fff;background:linear-gradient(135deg,var(--blue),var(--blue-deep));
+  width:44px;height:44px;border-radius:12px;display:grid;place-items:center;
+  box-shadow:var(--shadow);position:relative;
+}
+.chip::after{content:"";position:absolute;right:-3px;bottom:-3px;width:14px;height:14px;
+  background:var(--yellow);border-radius:4px;border:2px solid var(--bg)}
+h1{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.02em;margin:0}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--blue);font-weight:500}
+
+/* ---------- welcome ---------- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow)}
+.hero{padding:34px 34px 30px;margin-top:22px}
+.hero h1{font-size:clamp(28px,5vw,42px);margin:14px 0 6px}
+.lede{color:var(--muted);max-width:60ch;font-size:16px}
+.meta-row{display:flex;flex-wrap:wrap;gap:12px;margin:26px 0}
+.stat{flex:1;min-width:120px;border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#fafbfd}
+.stat .n{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;line-height:1}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:4px}
+.rules{border-top:1px dashed var(--line);margin-top:8px;padding-top:20px}
+.rules h3{font-family:'Space Grotesk',sans-serif;font-size:15px;margin:0 0 10px}
+.rules ul{margin:0;padding-left:20px;color:var(--muted);font-size:14.5px}
+.rules li{margin:5px 0}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:24px 0 6px}
+.field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+.field input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;
+  font:inherit;font-size:15px;background:#fff;transition:border .15s,box-shadow .15s}
+.field input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+.field.err input{border-color:var(--red);box-shadow:0 0 0 3px var(--red-soft)}
+.hint{font-size:12.5px;color:var(--red);margin-top:6px;display:none}
+.field.err .hint{display:block}
+
+.btn{font:inherit;font-weight:600;border:none;border-radius:10px;padding:13px 22px;cursor:pointer;
+  transition:transform .06s ease, filter .15s ease; font-size:15px}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:linear-gradient(135deg,var(--blue),var(--blue-deep));color:#fff;box-shadow:var(--shadow)}
+.btn-primary:hover{filter:brightness(1.06)}
+.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.btn-ghost:hover{background:#f6f8fb}
+.btn-yellow{background:var(--yellow);color:#4a3a10;box-shadow:var(--shadow)}
+.btn-yellow:hover{filter:brightness(1.03)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.start-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:18px}
+.tinylink{background:none;border:none;color:var(--muted);font:inherit;font-size:13px;
+  cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.tinylink:hover{color:var(--blue)}
+
+/* ---------- quiz top bar ---------- */
+.qbar{position:sticky;top:0;z-index:20;background:rgba(238,241,246,.86);
+  backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
+  padding:12px 20px;margin:-26px -20px 20px}
+.qbar-inner{max-width:1060px;margin:0 auto;display:flex;align-items:center;gap:16px}
+.qbar .title{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px}
+.timer{margin-left:auto;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:18px;
+  background:#fff;border:1px solid var(--line);border-radius:10px;padding:7px 14px;letter-spacing:.02em}
+.timer.warn{color:var(--red);border-color:var(--red);background:var(--red-soft);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.55}}
+.progress{height:6px;background:#dbe1ea;border-radius:99px;overflow:hidden;margin-top:10px}
+.progress > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--yellow),var(--yellow-deep));
+  border-radius:99px;transition:width .3s ease}
+
+.layout{display:grid;grid-template-columns:1fr 236px;gap:22px;align-items:start}
+
+/* ---------- question ---------- */
+.qcard{padding:26px 28px 30px}
+.qhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.tag{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;
+  padding:4px 9px;border-radius:6px;font-weight:500;text-transform:uppercase}
+.tag.topic{background:var(--blue-soft);color:var(--blue-deep)}
+.tag.d-Easy{background:var(--green-soft);color:#0f7a4d}
+.tag.d-Medium{background:#fef4dd;color:var(--yellow-deep)}
+.tag.d-Hard{background:var(--red-soft);color:#a5322d}
+.tag.type{background:#eef1f6;color:var(--muted)}
+.qnum{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted)}
+.qtext{font-size:18px;font-weight:500;margin:2px 0 4px}
+pre.code{background:var(--code-bg);color:var(--code-ink);border-radius:12px;padding:16px 18px;
+  margin:16px 0;overflow:auto;font-size:14px;line-height:1.65;position:relative;
+  border:1px solid #1c2c44}
+pre.code::before{content:">>>";position:absolute;top:10px;right:14px;color:#3f5978;
+  font-size:11px;font-weight:700;letter-spacing:.1em}
+.tok-key{color:var(--code-key)} .tok-str{color:var(--code-str)}
+.tok-num{color:#8fb8ff} .tok-com{color:#5f7391;font-style:italic} .tok-fn{color:#8fd0ff}
+
+.options{display:grid;gap:11px;margin-top:20px}
+.opt{display:flex;gap:13px;align-items:flex-start;text-align:left;width:100%;
+  border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:13px 15px;
+  cursor:pointer;font:inherit;font-size:15px;transition:border .12s,background .12s,box-shadow .12s}
+.opt:hover{border-color:var(--blue);background:#f8fbff}
+.opt .key{flex:none;width:26px;height:26px;border-radius:7px;background:#eef1f6;color:var(--muted);
+  display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px}
+.opt .otext{padding-top:2px}
+.opt .otext code,.opt.mono .otext{font-family:'JetBrains Mono',monospace}
+.opt.sel{border-color:var(--blue);background:var(--blue-soft);box-shadow:0 0 0 3px rgba(37,99,168,.12)}
+.opt.sel .key{background:var(--blue);color:#fff}
+.opt.correct{border-color:var(--green);background:var(--green-soft)}
+.opt.correct .key{background:var(--green);color:#fff}
+.opt.wrong{border-color:var(--red);background:var(--red-soft)}
+.opt.wrong .key{background:var(--red);color:#fff}
+.opt[disabled]{cursor:default}
+
+.qfoot{display:flex;align-items:center;gap:12px;margin-top:24px;flex-wrap:wrap}
+.qfoot .spacer{flex:1}
+
+/* ---------- palette ---------- */
+.side{position:sticky;top:86px}
+.side .card{padding:18px}
+.side h4{font-family:'Space Grotesk',sans-serif;font-size:13px;margin:0 0 12px;letter-spacing:.01em}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:7px}
+.pcell{aspect-ratio:1;border:1px solid var(--line);border-radius:8px;background:#fff;
+  font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--muted);
+  cursor:pointer;display:grid;place-items:center;transition:transform .06s}
+.pcell:hover{transform:scale(1.08)}
+.pcell.answered{background:var(--green);color:#fff;border-color:var(--green)}
+.pcell.marked{background:var(--yellow);color:#4a3a10;border-color:var(--yellow-deep)}
+.pcell.current{outline:2px solid var(--blue);outline-offset:1px;color:var(--blue);font-weight:700}
+.legend{display:grid;gap:6px;margin-top:14px;font-size:12px;color:var(--muted)}
+.legend span{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:7px;vertical-align:-1px}
+.sw-ans{background:var(--green)} .sw-mark{background:var(--yellow)} .sw-none{background:#fff;border:1px solid var(--line)}
+.side .btn{width:100%;margin-top:16px}
+.answered-count{font-size:13px;color:var(--muted);margin-top:14px;text-align:center}
+.answered-count b{color:var(--ink)}
+
+/* ---------- result ---------- */
+.scorecard{padding:34px;text-align:center}
+.ring{--p:0;width:168px;height:168px;border-radius:50%;margin:6px auto 4px;
+  background:conic-gradient(var(--blue) calc(var(--p)*1%), #e2e8f2 0);
+  display:grid;place-items:center;position:relative}
+.ring::before{content:"";position:absolute;inset:14px;background:var(--panel);border-radius:50%}
+.ring .inner{position:relative;z-index:1}
+.ring .pct{font-family:'Space Grotesk',sans-serif;font-size:40px;font-weight:700;line-height:1}
+.ring .sub{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.band{display:inline-block;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;
+  padding:6px 16px;border-radius:99px;margin:8px 0 4px}
+.res-stats{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin:22px 0 6px}
+.res-stats .box{border:1px solid var(--line);border-radius:12px;padding:14px 22px;min-width:110px;background:#fafbfd}
+.res-stats .box .n{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700}
+.res-stats .box.ok .n{color:var(--green)} .res-stats .box.no .n{color:var(--red)}
+.res-stats .box .l{font-size:12px;color:var(--muted)}
+
+.review{margin-top:26px}
+.review h2{font-family:'Space Grotesk',sans-serif;font-size:20px;margin:0 0 4px}
+.rev-controls{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 18px}
+.filterbtn{font:inherit;font-size:13px;font-weight:600;border:1px solid var(--line);background:#fff;
+  color:var(--muted);border-radius:99px;padding:7px 15px;cursor:pointer}
+.filterbtn.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.rev-item{border:1px solid var(--line);border-left-width:4px;border-radius:12px;padding:18px 20px;margin-bottom:12px;background:#fff}
+.rev-item.ok{border-left-color:var(--green)}
+.rev-item.no{border-left-color:var(--red)}
+.rev-item.skip{border-left-color:var(--muted)}
+.rev-top{display:flex;gap:10px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+.rev-badge{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px}
+.rev-badge.ok{background:var(--green-soft);color:#0f7a4d}
+.rev-badge.no{background:var(--red-soft);color:#a5322d}
+.rev-badge.skip{background:#eef1f6;color:var(--muted)}
+.rev-q{font-weight:500;margin:6px 0}
+.rev-ans{font-size:14px;margin:4px 0}
+.rev-ans .lab{color:var(--muted)}
+.rev-ans .yours.bad{color:var(--red);font-weight:600}
+.rev-ans .yours.good{color:var(--green);font-weight:600}
+.rev-ans .right{color:var(--green);font-weight:600}
+.expl{background:var(--blue-soft);border-radius:9px;padding:11px 14px;font-size:13.5px;margin-top:10px;color:var(--blue-deep)}
+.expl b{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+
+/* ---------- instructor ---------- */
+.gate{max-width:420px;margin:60px auto;text-align:center}
+.dash-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:24px 0 18px}
+.dash-head h1{font-size:26px}
+table.results{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;
+  border:1px solid var(--line);font-size:14px}
+table.results th,table.results td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line)}
+table.results th{background:#f4f6fa;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600}
+table.results tr:last-child td{border-bottom:none}
+table.results td.sc{font-family:'JetBrains Mono',monospace;font-weight:700}
+.empty{text-align:center;color:var(--muted);padding:40px;background:#fff;border:1px dashed var(--line);border-radius:12px}
+.summary-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.footer{text-align:center;color:var(--muted);font-size:12.5px;margin-top:34px}
+.footer code{background:#fff;padding:2px 6px;border-radius:5px;border:1px solid var(--line)}
+
+@media (max-width:820px){
+  .layout{grid-template-columns:1fr}
+  .side{position:static}
+  .palette{grid-template-columns:repeat(10,1fr)}
+  .form{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ WELCOME ============ -->
+  <section id="s-welcome" class="screen active">
+    <div class="brand">
+      <div class="chip">Py</div>
+      <div>
+        <div class="eyebrow">Assessment</div>
+        <div style="font-family:'Space Grotesk';font-weight:600;font-size:15px">Programming Test</div>
+      </div>
+    </div>
+
+    <div class="card hero">
+      <div class="eyebrow">100 questions &middot; 90 minutes</div>
+      <h1>Python Programming Test</h1>
+      <p class="lede">A 100-question multiple-choice test covering the fundamentals of Python 3 — data types, collections, control flow, functions, object-oriented programming, and exception handling.</p>
+
+      <div class="meta-row">
+        <div class="stat"><div class="n">100</div><div class="l">Questions</div></div>
+        <div class="stat"><div class="n">90<span style="font-size:15px"> min</span></div><div class="l">Time limit</div></div>
+        <div class="stat"><div class="n">1</div><div class="l">Mark each</div></div>
+        <div class="stat"><div class="n">4</div><div class="l">Options each</div></div>
+      </div>
+
+      <div class="rules">
+        <h3>Before you begin</h3>
+        <ul>
+          <li>Each question has exactly one correct answer. There is no negative marking.</li>
+          <li>Use the question grid on the right to move around; you can revisit and change answers any time before submitting.</li>
+          <li>The test submits automatically when the timer reaches zero.</li>
+          <li>Your score and a full answer review appear as soon as you submit.</li>
+        </ul>
+      </div>
+
+      <div class="form">
+        <div class="field" id="f-name">
+          <label for="in-name">Full name</label>
+          <input id="in-name" type="text" placeholder="e.g. Aarav Sharma" autocomplete="name">
+          <div class="hint">Please enter your name to start.</div>
+        </div>
+        <div class="field" id="f-roll">
+          <label for="in-roll">Roll number / ID <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+          <input id="in-roll" type="text" placeholder="e.g. 22CS013" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="start-row">
+        <button class="btn btn-primary" id="btn-start">Start test &rarr;</button>
+        <button class="tinylink" id="btn-instructor">Instructor access</button>
+      </div>
+    </div>
+    <div class="footer">Tip for the instructor: change the passcode and answer visibility inside the file &mdash; see <code>CONFIG</code> at the top of the script.</div>
+  </section>
+
+  <!-- ============ QUIZ ============ -->
+  <section id="s-quiz" class="screen">
+    <div class="qbar">
+      <div class="qbar-inner">
+        <div class="chip" style="width:34px;height:34px;font-size:12px;border-radius:9px">Py</div>
+        <span class="title">Python Programming Test</span>
+        <div class="timer" id="timer">90:00</div>
+      </div>
+      <div style="max-width:1060px;margin:0 auto"><div class="progress"><i id="bar"></i></div></div>
+    </div>
+
+    <div class="layout">
+      <div class="card qcard" id="qcard"><!-- question injected --></div>
+
+      <aside class="side">
+        <div class="card">
+          <h4>Question navigator</h4>
+          <div class="palette" id="palette"></div>
+          <div class="legend">
+            <div><span class="sw-ans"></span>Answered</div>
+            <div><span class="sw-mark"></span>Marked for review</div>
+            <div><span class="sw-none"></span>Not answered</div>
+          </div>
+          <div class="answered-count" id="acount"></div>
+          <button class="btn btn-yellow" id="btn-submit">Submit test</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ RESULT ============ -->
+  <section id="s-result" class="screen">
+    <div class="card scorecard">
+      <div class="eyebrow" id="res-name"></div>
+      <div class="ring" id="ring"><div class="inner">
+        <div class="pct" id="res-pct">0%</div>
+        <div class="sub" id="res-frac">0 / 100</div>
+      </div></div>
+      <div class="band" id="res-band">—</div>
+      <div class="res-stats">
+        <div class="box ok"><div class="n" id="res-correct">0</div><div class="l">Correct</div></div>
+        <div class="box no"><div class="n" id="res-wrong">0</div><div class="l">Incorrect</div></div>
+        <div class="box"><div class="n" id="res-skip">0</div><div class="l">Unanswered</div></div>
+        <div class="box"><div class="n" id="res-time">0:00</div><div class="l">Time taken</div></div>
+      </div>
+    </div>
+
+    <div class="review">
+      <h2>Answer review</h2>
+      <p style="color:var(--muted);margin:2px 0 0;font-size:14px">Every question with the correct answer and a short explanation.</p>
+      <div class="rev-controls">
+        <button class="filterbtn on" data-f="all">All</button>
+        <button class="filterbtn" data-f="no">Incorrect</button>
+        <button class="filterbtn" data-f="ok">Correct</button>
+        <button class="filterbtn" data-f="skip">Unanswered</button>
+      </div>
+      <div id="review-list"></div>
+      <div style="text-align:center;margin-top:22px">
+        <button class="btn btn-ghost" id="btn-retake">Take the test again</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ INSTRUCTOR ============ -->
+  <section id="s-instructor" class="screen">
+    <div id="gate" class="card gate" style="padding:30px">
+      <div class="chip" style="margin:0 auto 14px">Py</div>
+      <h1 style="font-size:22px;margin-bottom:6px">Instructor access</h1>
+      <p style="color:var(--muted);font-size:14px;margin-top:0">Enter the passcode to view student results.</p>
+      <div class="field" id="f-pass" style="text-align:left;margin:16px 0">
+        <input id="in-pass" type="password" placeholder="Passcode" style="text-align:center">
+        <div class="hint">Incorrect passcode.</div>
+      </div>
+      <button class="btn btn-primary" id="btn-unlock" style="width:100%">Unlock</button>
+      <button class="tinylink" id="btn-back-home" style="margin-top:16px">&larr; Back to test</button>
+    </div>
+
+    <div id="dash" style="display:none">
+      <div class="dash-head">
+        <div class="chip">Py</div>
+        <div><div class="eyebrow">Instructor dashboard</div><h1>Student results</h1></div>
+        <div style="margin-left:auto;display:flex;gap:10px">
+          <button class="btn btn-ghost" id="btn-refresh">Refresh</button>
+          <button class="btn btn-primary" id="btn-csv">Export CSV</button>
+        </div>
+      </div>
+      <div class="summary-row" id="summary"></div>
+      <div id="results-table"></div>
+      <div style="text-align:center;margin-top:22px">
+        <button class="tinylink" id="btn-back-home2">&larr; Back to test</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ======================================================================
+   CONFIG  — instructor can edit these three lines
+   ====================================================================== */
+const CONFIG = {
+  TIME_LIMIT_MIN: 90,        // total time for the test
+  SHUFFLE: true,             // shuffle question order + options per student
+  INSTRUCTOR_PASSCODE: "python2025"   // change this before sharing
+};
+/* ====================================================================== */
+
+const QUESTIONS = [{"id": 1, "topic": "Introduction to Python", "difficulty": "Easy", "type": "Conceptual", "question": "Python is best described as which type of language?", "code": "", "options": ["Compiled", "Interpreted", "Assembly", "Machine"], "correct": 1, "explanation": "Python is a high-level interpreted language; the interpreter executes code line by line."}, {"id": 2, "topic": "Introduction to Python", "difficulty": "Easy", "type": "Conceptual", "question": "Which symbol begins a single-line comment in Python?", "code": "", "options": ["//", "/* */", "#", "--"], "correct": 2, "explanation": "The # symbol starts a single-line comment in Python."}, {"id": 3, "topic": "Introduction to Python", "difficulty": "Medium", "type": "Conceptual", "question": "What is the role of indentation in Python?", "code": "", "options": ["Only improves readability", "It is optional", "It defines code blocks", "It marks comments"], "correct": 2, "explanation": "Python uses indentation (whitespace) to define code blocks instead of curly braces."}, {"id": 4, "topic": "Variables & Data Types", "difficulty": "Easy", "type": "Code Output", "question": "What is printed?", "code": "x = 3.14\nprint(type(x))", "options": ["<class 'int'>", "<class 'float'>", "<class 'double'>", "<class 'decimal'>"], "correct": 1, "explanation": "A literal with a decimal point is a float in Python."}, {"id": 5, "topic": "Variables & Data Types", "difficulty": "Easy", "type": "Conceptual", "question": "Which of these is a valid variable name?", "code": "", "options": ["2value", "my-var", "_total", "class"], "correct": 2, "explanation": "Names can't start with a digit, contain hyphens, or be keywords. _total is valid."}, {"id": 6, "topic": "Variables & Data Types", "difficulty": "Medium", "type": "Conceptual", "question": "What does 'dynamic typing' mean in Python?", "code": "", "options": ["Types must be declared before use", "A variable's type is fixed forever", "A variable can hold values of different types over time", "Python has no data types"], "correct": 2, "explanation": "You never declare a type; a variable can be reassigned to a value of a different type."}, {"id": 7, "topic": "Variables & Data Types", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "a = 10\na = \"ten\"\nprint(type(a))", "options": ["<class 'int'>", "<class 'str'>", "Error", "<class 'NoneType'>"], "correct": 1, "explanation": "Python is dynamically typed; a is rebound to a string, so its type is str."}, {"id": 8, "topic": "Variables & Data Types", "difficulty": "Easy", "type": "Conceptual", "question": "Which value represents the absence of a value in Python?", "code": "", "options": ["0", "null", "None", "void"], "correct": 2, "explanation": "None is Python's null object, representing 'no value'."}, {"id": 9, "topic": "Variables & Data Types", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "z = 2 + 3j\nprint(type(z))", "options": ["<class 'complex'>", "<class 'float'>", "<class 'int'>", "SyntaxError"], "correct": 0, "explanation": "The suffix j marks an imaginary part, making z a complex number."}, {"id": 10, "topic": "Type Casting", "difficulty": "Easy", "type": "Code Output", "question": "What is the output?", "code": "print(int(\"15\"))", "options": ["\"15\"", "15", "15.0", "Error"], "correct": 1, "explanation": "int() converts the numeric string \"15\" to the integer 15."}, {"id": 11, "topic": "Type Casting", "difficulty": "Easy", "type": "Code Output", "question": "What is the output?", "code": "print(int(9.99))", "options": ["10", "9.99", "9", "Error"], "correct": 2, "explanation": "int() truncates toward zero, discarding the decimal part, giving 9."}, {"id": 12, "topic": "Type Casting", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "print(bool(0), bool(\"\"), bool(\"0\"))", "options": ["False False False", "False False True", "True True True", "False True True"], "correct": 1, "explanation": "0 and the empty string are falsy; the non-empty string \"0\" is truthy."}, {"id": 13, "topic": "Type Casting", "difficulty": "Hard", "type": "Error Identification", "question": "Which conversion raises a ValueError?", "code": "", "options": ["int(\"42\")", "float(\"3.5\")", "int(\"3.5\")", "str(3.5)"], "correct": 2, "explanation": "int() cannot parse a string with a decimal point directly, so \"3.5\" raises ValueError."}, {"id": 14, "topic": "Operators", "difficulty": "Easy", "type": "Code Output", "question": "What is the output?", "code": "print(7 // 2)", "options": ["3.5", "3", "4", "1"], "correct": 1, "explanation": "// is floor division, so 7 // 2 gives 3."}, {"id": 15, "topic": "Operators", "difficulty": "Easy", "type": "Code Output", "question": "What is the output?", "code": "print(2 ** 3)", "options": ["6", "8", "9", "5"], "correct": 1, "explanation": "** is exponentiation; 2 raised to power 3 is 8."}, {"id": 16, "topic": "Operators", "difficulty": "Easy", "type": "Code Output", "question": "What is the output?", "code": "print(17 % 5)", "options": ["3", "2", "3.4", "0"], "correct": 1, "explanation": "% returns the remainder; 17 divided by 5 leaves remainder 2."}, {"id": 17, "topic": "Operators", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "print(True and False or True)", "options": ["True", "False", "None", "Error"], "correct": 0, "explanation": "'and' binds tighter: (True and False) is False, then False or True is True."}, {"id": 18, "topic": "Operators", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "a = [1, 2]\nb = [1, 2]\nprint(a == b, a is b)", "options": ["True True", "False False", "True False", "False True"], "correct": 2, "explanation": "== compares values (equal); 'is' compares identity (different objects)."}, {"id": 19, "topic": "Operators", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "print(5 & 3)", "options": ["7", "1", "8", "15"], "correct": 1, "explanation": "Bitwise AND of 101 and 011 is 001, which equals 1."}, {"id": 20, "topic": "Strings", "difficulty": "Easy", "type": "Code Output", "question": "What is the output?", "code": "s = \"Python\"\nprint(s[0])", "options": ["P", "y", "n", "0"], "correct": 0, "explanation": "Indexing starts at 0, so s[0] is 'P'."}, {"id": 21, "topic": "Strings", "difficulty": "Easy", "type": "Code Output", "question": "What is the output?", "code": "s = \"Python\"\nprint(s[-1])", "options": ["P", "n", "o", "Error"], "correct": 1, "explanation": "Negative index -1 refers to the last character, 'n'."}, {"id": 22, "topic": "Strings", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "s = \"programming\"\nprint(s[0:4])", "options": ["prog", "progr", "rogr", "gram"], "correct": 0, "explanation": "Slice [0:4] takes indices 0,1,2,3 giving 'prog'."}, {"id": 23, "topic": "Strings", "difficulty": "Easy", "type": "Code Output", "question": "What is the output?", "code": "print(\"a,b,c\".split(\",\"))", "options": ["['a', 'b', 'c']", "('a', 'b', 'c')", "'a b c'", "['a,b,c']"], "correct": 0, "explanation": "split(\",\") returns a list of substrings separated by the comma."}, {"id": 24, "topic": "Strings", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "print(\"-\".join([\"2024\", \"07\", \"30\"]))", "options": ["2024-07-30", "['2024-07-30']", "2024 07 30", "Error"], "correct": 0, "explanation": "join() concatenates the list items using \"-\" as the separator."}, {"id": 25, "topic": "Strings", "difficulty": "Easy", "type": "Code Output", "question": "What is the output?", "code": "print(\"  hello  \".strip())", "options": ["\"hello\"", "\"  hello\"", "\"hello  \"", "\"  hello  \""], "correct": 0, "explanation": "strip() removes leading and trailing whitespace."}, {"id": 26, "topic": "Strings", "difficulty": "Hard", "type": "Code Output", "question": "What is the output?", "code": "s = \"banana\"\nprint(s.replace(\"a\", \"o\", 2))", "options": ["bonono", "bonona", "banana", "bonano"], "correct": 1, "explanation": "replace with count=2 changes only the first two 'a's, giving 'bonona'."}, {"id": 27, "topic": "Lists", "difficulty": "Easy", "type": "Code Output", "question": "What is the output?", "code": "nums = [1, 2, 3]\nnums.append(4)\nprint(nums)", "options": ["[1, 2, 3]", "[1, 2, 3, 4]", "[4, 1, 2, 3]", "[1, 2, 3, [4]]"], "correct": 1, "explanation": "append() adds a single element to the end of the list."}, {"id": 28, "topic": "Lists", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "nums = [1, 2, 3]\nnums.extend([4, 5])\nprint(nums)", "options": ["[1, 2, 3, [4, 5]]", "[1, 2, 3, 4, 5]", "[1, 2, 3, 4]", "Error"], "correct": 1, "explanation": "extend() adds each element of the iterable individually."}, {"id": 29, "topic": "Lists", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "nums = [10, 20, 30]\nnums.insert(1, 15)\nprint(nums)", "options": ["[10, 15, 20, 30]", "[15, 10, 20, 30]", "[10, 20, 15, 30]", "[10, 15, 30]"], "correct": 0, "explanation": "insert(1, 15) places 15 at index 1, shifting later items right."}, {"id": 30, "topic": "Lists", "difficulty": "Easy", "type": "Code Output", "question": "What is the output?", "code": "nums = [1, 2, 3, 4]\nprint(nums[1:3])", "options": ["[1, 2]", "[2, 3]", "[2, 3, 4]", "[1, 2, 3]"], "correct": 1, "explanation": "Slice [1:3] returns the elements at indices 1 and 2."}, {"id": 31, "topic": "Lists", "difficulty": "Hard", "type": "Code Output", "question": "What is the output?", "code": "a = [1, 2, 3]\nb = a\nb.append(4)\nprint(a)", "options": ["[1, 2, 3]", "[1, 2, 3, 4]", "Error", "[4, 1, 2, 3]"], "correct": 1, "explanation": "b and a point to the same list object, so appending via b also changes a."}, {"id": 32, "topic": "Lists", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "squares = [x**2 for x in range(5)]\nprint(squares)", "options": ["[0, 1, 4, 9, 16]", "[1, 4, 9, 16, 25]", "[0, 1, 2, 3, 4]", "[1, 2, 3, 4, 5]"], "correct": 0, "explanation": "range(5) is 0..4; squaring each gives 0, 1, 4, 9, 16."}, {"id": 33, "topic": "Lists", "difficulty": "Easy", "type": "Code Output", "question": "What is the output?", "code": "nums = [3, 1, 2]\nnums.sort()\nprint(nums)", "options": ["[3, 2, 1]", "[1, 2, 3]", "[3, 1, 2]", "None"], "correct": 1, "explanation": "sort() sorts the list in place in ascending order."}, {"id": 34, "topic": "Tuples", "difficulty": "Easy", "type": "Conceptual", "question": "Which statement about tuples is true?", "code": "", "options": ["Tuples are mutable", "Tuples use square brackets", "Tuples are immutable", "Tuples cannot store mixed types"], "correct": 2, "explanation": "Tuples are immutable; their contents cannot change after creation."}, {"id": 35, "topic": "Tuples", "difficulty": "Medium", "type": "Error Identification", "question": "What happens when this runs?", "code": "t = (1, 2, 3)\nt[0] = 10\nprint(t)", "options": ["Prints (10, 2, 3)", "TypeError", "Prints (1, 2, 3)", "IndexError"], "correct": 1, "explanation": "Tuples do not support item assignment, so this raises TypeError."}, {"id": 36, "topic": "Tuples", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "a, b, c = (1, 2, 3)\nprint(b)", "options": ["1", "2", "3", "(1, 2, 3)"], "correct": 1, "explanation": "Tuple unpacking assigns 1->a, 2->b, 3->c, so b is 2."}, {"id": 37, "topic": "Tuples", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "t = (5, 3, 5, 2, 5)\nprint(t.count(5))", "options": ["2", "3", "1", "5"], "correct": 1, "explanation": "count(5) returns how many times 5 appears, which is 3."}, {"id": 38, "topic": "Sets", "difficulty": "Easy", "type": "Code Output", "question": "What is the output?", "code": "s = {1, 2, 2, 3, 3, 3}\nprint(len(s))", "options": ["6", "3", "2", "1"], "correct": 1, "explanation": "Sets keep only unique elements, so duplicates collapse to {1, 2, 3}."}, {"id": 39, "topic": "Sets", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "a = {1, 2, 3}\nb = {2, 3, 4}\nprint(a & b)", "options": ["{1, 2, 3, 4}", "{2, 3}", "{1, 4}", "{1}"], "correct": 1, "explanation": "& is set intersection, returning elements common to both sets."}, {"id": 40, "topic": "Sets", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "a = {1, 2, 3}\nb = {2, 3, 4}\nprint(a | b)", "options": ["{2, 3}", "{1, 4}", "{1, 2, 3, 4}", "{1, 2, 2, 3, 3, 4}"], "correct": 2, "explanation": "| is set union, combining all unique elements from both sets."}, {"id": 41, "topic": "Sets", "difficulty": "Hard", "type": "Code Output", "question": "What is the output?", "code": "s = {1, 2, 3}\ns.discard(5)\ns.remove(2)\nprint(s)", "options": ["{1, 3}", "Error", "{1, 2, 3}", "{2}"], "correct": 0, "explanation": "discard(5) does nothing for a missing element; remove(2) deletes 2, leaving {1, 3}."}, {"id": 42, "topic": "Dictionaries", "difficulty": "Easy", "type": "Code Output", "question": "What is the output?", "code": "d = {\"a\": 1, \"b\": 2}\nprint(d[\"b\"])", "options": ["1", "2", "\"b\"", "Error"], "correct": 1, "explanation": "d[\"b\"] looks up the value stored under key \"b\", which is 2."}, {"id": 43, "topic": "Dictionaries", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "d = {\"x\": 10}\nprint(d.get(\"y\", 0))", "options": ["0", "None", "KeyError", "10"], "correct": 0, "explanation": "get() returns the default (0) when the key is missing, instead of raising an error."}, {"id": 44, "topic": "Dictionaries", "difficulty": "Medium", "type": "Error Identification", "question": "Which exception is raised?", "code": "d = {\"x\": 10}\nprint(d[\"y\"])", "options": ["ValueError", "IndexError", "KeyError", "TypeError"], "correct": 2, "explanation": "Accessing a missing key with [] raises KeyError."}, {"id": 45, "topic": "Dictionaries", "difficulty": "Easy", "type": "Code Output", "question": "What is the output?", "code": "d = {\"a\": 1}\nd.update({\"b\": 2})\nprint(d)", "options": ["{\"a\": 1}", "{\"b\": 2}", "{\"a\": 1, \"b\": 2}", "Error"], "correct": 2, "explanation": "update() merges the new key/value pairs into the dictionary."}, {"id": 46, "topic": "Dictionaries", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "d = {\"a\": 1, \"b\": 2}\nprint(list(d.keys()))", "options": ["['a', 'b']", "[1, 2]", "[('a', 1), ('b', 2)]", "{'a', 'b'}"], "correct": 0, "explanation": "keys() returns the dictionary's keys, converted here into a list."}, {"id": 47, "topic": "Dictionaries", "difficulty": "Hard", "type": "Code Output", "question": "What is the output?", "code": "d = {x: x*x for x in range(1, 4)}\nprint(d)", "options": ["{1: 1, 2: 4, 3: 9}", "{1: 1, 2: 2, 3: 3}", "[1, 4, 9]", "{0: 0, 1: 1, 2: 4}"], "correct": 0, "explanation": "The dict comprehension maps each x in 1..3 to its square."}, {"id": 48, "topic": "Control Flow (if, elif, else)", "difficulty": "Easy", "type": "Code Output", "question": "What is the output?", "code": "x = 7\nif x % 2 == 0:\n    print(\"even\")\nelse:\n    print(\"odd\")", "options": ["even", "odd", "7", "Error"], "correct": 1, "explanation": "7 % 2 is 1 (not 0), so the else branch runs and prints 'odd'."}, {"id": 49, "topic": "Control Flow (if, elif, else)", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "score = 85\nif score >= 90:\n    print(\"A\")\nelif score >= 80:\n    print(\"B\")\nelse:\n    print(\"C\")", "options": ["A", "B", "C", "Nothing"], "correct": 1, "explanation": "85 fails the first test but satisfies score >= 80, so 'B' prints."}, {"id": 50, "topic": "Control Flow (if, elif, else)", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "x = 5\nresult = \"yes\" if x > 3 else \"no\"\nprint(result)", "options": ["yes", "no", "True", "Error"], "correct": 0, "explanation": "The ternary expression returns 'yes' because x > 3 is True."}, {"id": 51, "topic": "Control Flow (if, elif, else)", "difficulty": "Easy", "type": "Conceptual", "question": "Which keyword checks an additional condition after an if?", "code": "", "options": ["elseif", "elif", "else if", "elsif"], "correct": 1, "explanation": "Python uses elif for chained conditional checks."}, {"id": 52, "topic": "Control Flow (if, elif, else)", "difficulty": "Hard", "type": "Code Output", "question": "What is the output?", "code": "x = 0\nif x:\n    print(\"truthy\")\nelse:\n    print(\"falsy\")", "options": ["truthy", "falsy", "0", "Error"], "correct": 1, "explanation": "0 is falsy, so the else block executes and prints 'falsy'."}, {"id": 53, "topic": "Loops (for, while)", "difficulty": "Easy", "type": "Code Output", "question": "What is the output?", "code": "for i in range(3):\n    print(i, end=\" \")", "options": ["0 1 2", "1 2 3", "0 1 2 3", "1 2"], "correct": 0, "explanation": "range(3) yields 0, 1, 2."}, {"id": 54, "topic": "Loops (for, while)", "difficulty": "Easy", "type": "Code Output", "question": "What is the output?", "code": "total = 0\nfor n in [1, 2, 3, 4]:\n    total += n\nprint(total)", "options": ["10", "24", "4", "1234"], "correct": 0, "explanation": "The loop accumulates 1 + 2 + 3 + 4 = 10."}, {"id": 55, "topic": "Loops (for, while)", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "i = 1\nwhile i < 4:\n    print(i, end=\" \")\n    i += 1", "options": ["1 2 3", "1 2 3 4", "0 1 2 3", "infinite loop"], "correct": 0, "explanation": "The loop prints 1, 2, 3 and stops when i reaches 4."}, {"id": 56, "topic": "Loops (for, while)", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "for i, c in enumerate(\"ab\"):\n    print(i, c)", "options": ["0 a\\n1 b", "1 a\\n2 b", "a 0\\nb 1", "Error"], "correct": 0, "explanation": "enumerate() yields (index, item) pairs starting at 0."}, {"id": 57, "topic": "Loops (for, while)", "difficulty": "Hard", "type": "Code Output", "question": "What is the output?", "code": "for i in range(1, 6, 2):\n    print(i, end=\" \")", "options": ["1 2 3 4 5", "1 3 5", "2 4 6", "1 3 5 7"], "correct": 1, "explanation": "range(1, 6, 2) steps by 2, producing 1, 3, 5."}, {"id": 58, "topic": "break, continue, pass", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "for i in range(5):\n    if i == 3:\n        break\n    print(i, end=\" \")", "options": ["0 1 2", "0 1 2 3", "0 1 2 3 4", "3 4"], "correct": 0, "explanation": "break exits the loop when i == 3, so only 0, 1, 2 print."}, {"id": 59, "topic": "break, continue, pass", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "for i in range(5):\n    if i % 2 == 0:\n        continue\n    print(i, end=\" \")", "options": ["0 2 4", "1 3", "0 1 2 3 4", "1 3 5"], "correct": 1, "explanation": "continue skips even numbers, printing only the odd ones 1 and 3."}, {"id": 60, "topic": "break, continue, pass", "difficulty": "Easy", "type": "Conceptual", "question": "What does the pass statement do?", "code": "", "options": ["Exits the loop", "Skips one iteration", "Does nothing (placeholder)", "Raises an error"], "correct": 2, "explanation": "pass is a null statement used as a placeholder where code is syntactically required."}, {"id": 61, "topic": "break, continue, pass", "difficulty": "Hard", "type": "Code Output", "question": "What does this print?", "code": "for i in range(3):\n    for j in range(3):\n        if j == 1:\n            break\n        print(i, j)", "options": ["0 0\\n1 0\\n2 0", "All nine (i, j) pairs", "Nothing", "0 0 only"], "correct": 0, "explanation": "The inner break stops each inner loop at j == 1, so only j == 0 prints for each i."}, {"id": 62, "topic": "Functions", "difficulty": "Easy", "type": "Code Output", "question": "What is the output?", "code": "def add(a, b):\n    return a + b\nprint(add(2, 3))", "options": ["23", "5", "None", "Error"], "correct": 1, "explanation": "The function returns the sum 2 + 3 = 5."}, {"id": 63, "topic": "Functions", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "def greet(name):\n    print(\"Hi\", name)\nx = greet(\"Sam\")\nprint(x)", "options": ["Hi Sam\\nNone", "Hi Sam\\nHi Sam", "None", "Error"], "correct": 0, "explanation": "greet prints but has no return, so x is None."}, {"id": 64, "topic": "Functions", "difficulty": "Medium", "type": "Conceptual", "question": "What is a local variable?", "code": "", "options": ["Defined outside all functions", "Accessible everywhere in the program", "Defined inside a function and limited to it", "Another name for a constant"], "correct": 2, "explanation": "A local variable exists only within the function where it is defined."}, {"id": 65, "topic": "Functions", "difficulty": "Hard", "type": "Code Output", "question": "What is the output?", "code": "count = 0\ndef inc():\n    count = 1\ninc()\nprint(count)", "options": ["0", "1", "None", "Error"], "correct": 0, "explanation": "Inside inc, count is a new local variable; the global count stays 0."}, {"id": 66, "topic": "Functions", "difficulty": "Hard", "type": "Code Output", "question": "What is the output?", "code": "def fact(n):\n    if n <= 1:\n        return 1\n    return n * fact(n - 1)\nprint(fact(4))", "options": ["24", "12", "4", "10"], "correct": 0, "explanation": "Recursion computes 4 * 3 * 2 * 1 = 24."}, {"id": 67, "topic": "Functions", "difficulty": "Medium", "type": "Best Practice", "question": "Which statement makes a function explicitly return None?", "code": "", "options": ["return void", "return", "return null", "exit"], "correct": 1, "explanation": "A bare return (or no return at all) causes the function to return None."}, {"id": 68, "topic": "Functions", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "def outer():\n    x = 10\n    def inner():\n        return x + 5\n    return inner()\nprint(outer())", "options": ["10", "15", "5", "Error"], "correct": 1, "explanation": "inner accesses the enclosing x (10) and returns 15."}, {"id": 69, "topic": "Function Arguments", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "def power(base, exp=2):\n    return base ** exp\nprint(power(3))", "options": ["6", "9", "3", "Error"], "correct": 1, "explanation": "exp defaults to 2, so 3 ** 2 = 9."}, {"id": 70, "topic": "Function Arguments", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "def info(a, b):\n    return f\"{a}-{b}\"\nprint(info(b=2, a=1))", "options": ["1-2", "2-1", "Error", "a-b"], "correct": 0, "explanation": "Keyword arguments bind by name, so a=1 and b=2 give '1-2'."}, {"id": 71, "topic": "Function Arguments", "difficulty": "Hard", "type": "Code Output", "question": "What is the output?", "code": "def total(*args):\n    return sum(args)\nprint(total(1, 2, 3, 4))", "options": ["10", "[1, 2, 3, 4]", "4", "Error"], "correct": 0, "explanation": "*args collects positional arguments into a tuple; sum gives 10."}, {"id": 72, "topic": "Function Arguments", "difficulty": "Hard", "type": "Code Output", "question": "What is the output?", "code": "def show(**kwargs):\n    return len(kwargs)\nprint(show(x=1, y=2, z=3))", "options": ["3", "6", "1", "Error"], "correct": 0, "explanation": "**kwargs collects keyword arguments into a dict, which has 3 items."}, {"id": 73, "topic": "Lambda Functions", "difficulty": "Easy", "type": "Code Output", "question": "What is the output?", "code": "square = lambda x: x * x\nprint(square(6))", "options": ["12", "36", "6", "Error"], "correct": 1, "explanation": "The lambda returns x * x, so 6 * 6 = 36."}, {"id": 74, "topic": "Lambda Functions", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "pairs = [(1, 3), (2, 1), (4, 2)]\npairs.sort(key=lambda p: p[1])\nprint(pairs)", "options": ["[(2, 1), (4, 2), (1, 3)]", "[(1, 3), (2, 1), (4, 2)]", "[(1, 3), (4, 2), (2, 1)]", "Error"], "correct": 0, "explanation": "The lambda sorts by the second element, giving order 1, 2, 3."}, {"id": 75, "topic": "Lambda Functions", "difficulty": "Medium", "type": "Error Identification", "question": "Which is a correct lambda that adds two numbers?", "code": "", "options": ["lambda a, b: return a + b", "lambda a, b = a + b", "lambda a, b: a + b", "lambda(a, b): a + b"], "correct": 2, "explanation": "A lambda uses an expression after the colon and no 'return' keyword: lambda a, b: a + b."}, {"id": 76, "topic": "map(), filter()", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "nums = [1, 2, 3, 4]\nresult = list(map(lambda x: x * 2, nums))\nprint(result)", "options": ["[1, 2, 3, 4]", "[2, 4, 6, 8]", "[1, 4, 9, 16]", "[2, 4]"], "correct": 1, "explanation": "map applies the doubling lambda to each element."}, {"id": 77, "topic": "map(), filter()", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "nums = [1, 2, 3, 4, 5, 6]\nresult = list(filter(lambda x: x % 2 == 0, nums))\nprint(result)", "options": ["[1, 3, 5]", "[2, 4, 6]", "[1, 2, 3, 4, 5, 6]", "[]"], "correct": 1, "explanation": "filter keeps elements where the predicate is True, i.e. the even numbers."}, {"id": 78, "topic": "map(), filter()", "difficulty": "Hard", "type": "Code Output", "question": "What is the output?", "code": "a = [1, 2, 3]\nb = [4, 5, 6]\nprint(list(map(lambda x, y: x + y, a, b)))", "options": ["[5, 7, 9]", "[1, 2, 3, 4, 5, 6]", "[4, 10, 18]", "Error"], "correct": 0, "explanation": "map can take multiple iterables, adding corresponding elements: 1+4, 2+5, 3+6."}, {"id": 79, "topic": "Object-Oriented Programming Concepts", "difficulty": "Easy", "type": "Conceptual", "question": "What is an object in Python?", "code": "", "options": ["A blueprint", "An instance of a class", "A function", "A module"], "correct": 1, "explanation": "An object is a concrete instance created from a class blueprint."}, {"id": 80, "topic": "Object-Oriented Programming Concepts", "difficulty": "Medium", "type": "Conceptual", "question": "What does 'self' refer to inside a method?", "code": "", "options": ["The class itself", "The current instance", "A global variable", "The parent class"], "correct": 1, "explanation": "self refers to the specific instance on which the method is called."}, {"id": 81, "topic": "Classes & Objects", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "class Dog:\n    def __init__(self, name):\n        self.name = name\nd = Dog(\"Rex\")\nprint(d.name)", "options": ["Rex", "name", "Dog", "Error"], "correct": 0, "explanation": "The constructor stores \"Rex\" in self.name, printed via d.name."}, {"id": 82, "topic": "Classes & Objects", "difficulty": "Medium", "type": "Conceptual", "question": "Which method acts as the constructor in a Python class?", "code": "", "options": ["__start__", "__init__", "__new__ only", "constructor()"], "correct": 1, "explanation": "__init__ initializes a new object's attributes when it is created."}, {"id": 83, "topic": "Classes & Objects", "difficulty": "Hard", "type": "Code Output", "question": "What is the output?", "code": "class Counter:\n    count = 0\n    def __init__(self):\n        Counter.count += 1\na = Counter()\nb = Counter()\nprint(Counter.count)", "options": ["0", "1", "2", "Error"], "correct": 2, "explanation": "count is a class variable incremented on each instantiation; two objects make it 2."}, {"id": 84, "topic": "Inheritance", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "class A:\n    def hello(self):\n        return \"A\"\nclass B(A):\n    pass\nprint(B().hello())", "options": ["A", "B", "None", "Error"], "correct": 0, "explanation": "B inherits hello() from A because it defines no method of its own."}, {"id": 85, "topic": "Inheritance", "difficulty": "Medium", "type": "Conceptual", "question": "Multilevel inheritance means:", "code": "", "options": ["One child inherits from many parents", "A chain such as A -> B -> C", "Many children inherit from one parent", "No inheritance at all"], "correct": 1, "explanation": "Multilevel inheritance forms a chain where each class inherits from the previous one."}, {"id": 86, "topic": "Inheritance", "difficulty": "Hard", "type": "Code Output", "question": "What is the output?", "code": "class A:\n    def __init__(self):\n        self.x = 1\nclass B(A):\n    def __init__(self):\n        super().__init__()\n        self.y = 2\nb = B()\nprint(b.x, b.y)", "options": ["1 2", "2 1", "Error", "1 1"], "correct": 0, "explanation": "super().__init__() runs A's constructor setting x=1, then y=2 is set in B."}, {"id": 87, "topic": "Polymorphism", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "class Cat:\n    def sound(self):\n        return \"Meow\"\nclass Cow:\n    def sound(self):\n        return \"Moo\"\nfor a in (Cat(), Cow()):\n    print(a.sound())", "options": ["Meow\\nMoo", "Moo\\nMeow", "Meow\\nMeow", "Error"], "correct": 0, "explanation": "Each object responds to sound() in its own way, illustrating polymorphism."}, {"id": 88, "topic": "Polymorphism", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "print(len(\"abc\"), len([1, 2]))", "options": ["3 2", "abc 2", "3 3", "Error"], "correct": 0, "explanation": "len() is polymorphic, returning the size of both a string and a list."}, {"id": 89, "topic": "Polymorphism", "difficulty": "Hard", "type": "Conceptual", "question": "Operator polymorphism (operator overloading) is implemented by defining:", "code": "", "options": ["Dunder methods like __add__", "A plus() method", "The overload keyword", "An operator() method"], "correct": 0, "explanation": "Special methods such as __add__ let objects define how operators like + behave."}, {"id": 90, "topic": "Encapsulation", "difficulty": "Medium", "type": "Conceptual", "question": "A single leading underscore (_name) conventionally indicates a member that is:", "code": "", "options": ["Public", "Protected / for internal use", "Private with name mangling", "A constant"], "correct": 1, "explanation": "A single underscore is a convention signalling a protected, internal-use attribute."}, {"id": 91, "topic": "Encapsulation", "difficulty": "Hard", "type": "Code Output", "question": "What is the output?", "code": "class Account:\n    def __init__(self):\n        self.__balance = 100\na = Account()\nprint(a._Account__balance)", "options": ["100", "Error", "None", "__balance"], "correct": 0, "explanation": "Double underscore triggers name mangling; the attribute is reachable as _Account__balance."}, {"id": 92, "topic": "Encapsulation", "difficulty": "Medium", "type": "Conceptual", "question": "What is the main purpose of encapsulation?", "code": "", "options": ["To allow multiple inheritance", "To bundle data with methods and restrict direct access", "To speed up loops", "To convert data types"], "correct": 1, "explanation": "Encapsulation groups data and behavior together and controls access to internal state."}, {"id": 93, "topic": "Method Overloading", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "class Math:\n    def add(self, a, b=0, c=0):\n        return a + b + c\nm = Math()\nprint(m.add(2), m.add(2, 3), m.add(2, 3, 4))", "options": ["2 5 9", "2 3 4", "Error", "0 5 9"], "correct": 0, "explanation": "Default arguments simulate overloading; the same method handles different call forms."}, {"id": 94, "topic": "Method Overloading", "difficulty": "Hard", "type": "Conceptual", "question": "Why does Python not support traditional method overloading (same name, different signatures)?", "code": "", "options": ["It has no methods", "A later definition replaces the earlier one", "It allows only one argument", "Methods cannot be named"], "correct": 1, "explanation": "Defining two methods with the same name keeps only the last; overloading is simulated with defaults or *args."}, {"id": 95, "topic": "Method Overriding", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "class Base:\n    def show(self):\n        return \"base\"\nclass Child(Base):\n    def show(self):\n        return \"child\"\nprint(Child().show())", "options": ["base", "child", "base child", "Error"], "correct": 1, "explanation": "Child overrides show(), so the child version is called."}, {"id": 96, "topic": "Method Overriding", "difficulty": "Hard", "type": "Code Output", "question": "What is the output?", "code": "class Base:\n    def show(self):\n        return \"base\"\nclass Child(Base):\n    def show(self):\n        return super().show() + \"-child\"\nprint(Child().show())", "options": ["base", "child", "base-child", "Error"], "correct": 2, "explanation": "super().show() calls the parent method, combined into 'base-child'."}, {"id": 97, "topic": "Exception Handling", "difficulty": "Easy", "type": "Code Output", "question": "What is the output?", "code": "try:\n    print(10 / 0)\nexcept ZeroDivisionError:\n    print(\"cannot divide\")", "options": ["0", "cannot divide", "Error", "inf"], "correct": 1, "explanation": "Dividing by zero raises ZeroDivisionError, caught by the except block."}, {"id": 98, "topic": "Exception Handling", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "try:\n    x = int(\"abc\")\nexcept ValueError:\n    print(\"bad value\")", "options": ["bad value", "0", "abc", "TypeError"], "correct": 0, "explanation": "int(\"abc\") cannot parse the string, raising ValueError, which is caught."}, {"id": 99, "topic": "Exception Handling", "difficulty": "Medium", "type": "Code Output", "question": "What is the output?", "code": "try:\n    print(\"try\")\nfinally:\n    print(\"finally\")", "options": ["try", "finally", "try\\nfinally", "Error"], "correct": 2, "explanation": "The finally block always runs, so both lines print in order."}, {"id": 100, "topic": "Exception Handling", "difficulty": "Hard", "type": "Conceptual", "question": "Which exception is raised by accessing a list index that is out of range?", "code": "", "options": ["KeyError", "IndexError", "ValueError", "TypeError"], "correct": 1, "explanation": "Accessing a nonexistent list index raises IndexError."}];
+
+/* ---------- tiny helpers ---------- */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const KEYS = ["A","B","C","D"];
+function show(id){ $$(".screen").forEach(s=>s.classList.remove("active")); $(id).classList.add("active"); window.scrollTo(0,0); }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+/* naive python syntax highlighter for code blocks */
+const PYKW = new Set(["def","return","if","elif","else","for","while","in","not","and","or","is",
+  "class","try","except","finally","raise","pass","break","continue","lambda","import","from",
+  "None","True","False","print","range","len","int","float","str","bool","list","tuple","set",
+  "dict","sum","map","filter","enumerate","super","self"]);
+function highlight(code){
+  const out = esc(code).split("\n").map(line=>{
+    return line.replace(/(#.*$)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')|(\b\d+\.?\d*[jJ]?\b)|([A-Za-z_]\w*)/g,
+      (m,com,str,num,word)=>{
+        if(com) return '<span class="tok-com">'+com+'</span>';
+        if(str) return '<span class="tok-str">'+str+'</span>';
+        if(num) return '<span class="tok-num">'+num+'</span>';
+        if(word && PYKW.has(word)) return '<span class="tok-key">'+word+'</span>';
+        return m;
+      });
+  }).join("\n");
+  return out;
+}
+/* render option text: monospace if it looks like code/output */
+function optHTML(t){
+  const looksCode = /[\[\](){}<>'"=]|class |None|True|False/.test(t);
+  const body = esc(t).replace(/\\n/g,"<br>");
+  return looksCode ? '<code>'+body+'</code>' : body;
+}
+
+/* ---------- state ---------- */
+let quiz=[], cur=0, timeLeft=0, timer=null, started=0, student={};
+
+/* ======================= WELCOME ======================= */
+$("#btn-start").addEventListener("click", ()=>{
+  const name = $("#in-name").value.trim();
+  if(!name){ $("#f-name").classList.add("err"); $("#in-name").focus(); return; }
+  $("#f-name").classList.remove("err");
+  student = { name, roll: $("#in-roll").value.trim() };
+  buildQuiz();
+  startTimer();
+  started = Date.now();
+  show("#s-quiz");
+  renderQuestion();
+});
+$("#in-name").addEventListener("input", ()=>$("#f-name").classList.remove("err"));
+$("#btn-instructor").addEventListener("click", ()=>{ show("#s-instructor"); $("#in-pass").focus(); });
+
+function buildQuiz(){
+  let base = QUESTIONS.map(q=>({...q}));
+  if(CONFIG.SHUFFLE) shuffle(base);
+  quiz = base.map(q=>{
+    let opts = q.options.map((text,i)=>({text, correct:i===q.correct}));
+    if(CONFIG.SHUFFLE) shuffle(opts);
+    return { ...q, opts, selected:null, marked:false };
+  });
+  cur = 0;
+}
+
+/* ======================= TIMER ======================= */
+function startTimer(){
+  timeLeft = CONFIG.TIME_LIMIT_MIN*60;
+  paintTimer();
+  timer = setInterval(()=>{
+    timeLeft--; paintTimer();
+    if(timeLeft<=0){ clearInterval(timer); submit(true); }
+  },1000);
+}
+function paintTimer(){
+  const m=Math.floor(timeLeft/60), s=timeLeft%60;
+  const el=$("#timer");
+  el.textContent = String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+  el.classList.toggle("warn", timeLeft<=300);
+}
+
+/* ======================= QUESTION RENDER ======================= */
+function renderQuestion(){
+  const q = quiz[cur];
+  const codeBlock = q.code ? '<pre class="code">'+highlight(q.code)+'</pre>' : '';
+  const opts = q.opts.map((o,i)=>{
+    const sel = q.selected===i ? ' sel' : '';
+    return '<button class="opt'+sel+'" data-i="'+i+'">'+
+             '<span class="key">'+KEYS[i]+'</span>'+
+             '<span class="otext">'+optHTML(o.text)+'</span>'+
+           '</button>';
+  }).join("");
+
+  $("#qcard").innerHTML =
+    '<div class="qhead">'+
+      '<span class="tag topic">'+esc(q.topic)+'</span>'+
+      '<span class="tag d-'+q.difficulty+'">'+q.difficulty+'</span>'+
+      '<span class="tag type">'+esc(q.type)+'</span>'+
+      '<span class="qnum">Q'+(cur+1)+' / '+quiz.length+'</span>'+
+    '</div>'+
+    '<div class="qtext">'+esc(q.question)+'</div>'+
+    codeBlock+
+    '<div class="options">'+opts+'</div>'+
+    '<div class="qfoot">'+
+      '<button class="btn btn-ghost" id="prev" '+(cur===0?'disabled':'')+'>&larr; Previous</button>'+
+      '<button class="btn btn-ghost" id="mark">'+(q.marked?'&#9733; Unmark':'&#9734; Mark for review')+'</button>'+
+      '<button class="tinylink" id="clear">Clear response</button>'+
+      '<span class="spacer"></span>'+
+      (cur===quiz.length-1
+        ? '<button class="btn btn-yellow" id="next">Finish &rarr;</button>'
+        : '<button class="btn btn-primary" id="next">Next &rarr;</button>')+
+    '</div>';
+
+  $$("#qcard .opt").forEach(b=>b.addEventListener("click",()=>{
+    quiz[cur].selected = +b.dataset.i;
+    renderQuestion(); renderPalette();
+  }));
+  $("#prev").addEventListener("click",()=>{ if(cur>0){cur--;renderQuestion();renderPalette();} });
+  $("#next").addEventListener("click",()=>{
+    if(cur<quiz.length-1){ cur++; renderQuestion(); renderPalette(); }
+    else confirmSubmit();
+  });
+  $("#mark").addEventListener("click",()=>{ quiz[cur].marked=!quiz[cur].marked; renderQuestion(); renderPalette(); });
+  $("#clear").addEventListener("click",()=>{ quiz[cur].selected=null; renderQuestion(); renderPalette(); });
+
+  $("#bar").style.width = ((cur+1)/quiz.length*100)+"%";
+  renderPalette();
+}
+
+function renderPalette(){
+  const p = $("#palette");
+  p.innerHTML = quiz.map((q,i)=>{
+    let cls="pcell";
+    if(q.selected!==null) cls+=" answered";
+    if(q.marked) cls+=" marked";
+    if(i===cur) cls+=" current";
+    return '<button class="'+cls+'" data-i="'+i+'">'+(i+1)+'</button>';
+  }).join("");
+  $$("#palette .pcell").forEach(b=>b.addEventListener("click",()=>{ cur=+b.dataset.i; renderQuestion(); }));
+  const answered = quiz.filter(q=>q.selected!==null).length;
+  $("#acount").innerHTML = '<b>'+answered+'</b> of <b>'+quiz.length+'</b> answered';
+}
+
+$("#btn-submit").addEventListener("click", confirmSubmit);
+function confirmSubmit(){
+  const answered = quiz.filter(q=>q.selected!==null).length;
+  const left = quiz.length-answered;
+  let msg = "Submit your test now?";
+  if(left>0) msg += "\n\nYou have "+left+" unanswered question"+(left>1?"s":"")+". They will be marked incorrect.";
+  if(confirm(msg)) submit(false);
+}
+
+/* ======================= SCORING + RESULT ======================= */
+function submit(auto){
+  if(timer) clearInterval(timer);
+  const total = quiz.length;
+  let correct=0, wrong=0, skip=0;
+  quiz.forEach(q=>{
+    if(q.selected===null) skip++;
+    else if(q.opts[q.selected].correct) correct++;
+    else wrong++;
+  });
+  const pct = Math.round(correct/total*100);
+  const secs = Math.round((Date.now()-started)/1000);
+  const timeStr = Math.floor(secs/60)+":"+String(secs%60).padStart(2,"0");
+
+  // paint scorecard
+  $("#res-name").textContent = student.name + (student.roll?(" · "+student.roll):"") + (auto?" · time expired":"");
+  $("#res-pct").textContent = pct+"%";
+  $("#res-frac").textContent = correct+" / "+total;
+  $("#ring").style.setProperty("--p", pct);
+  $("#res-correct").textContent = correct;
+  $("#res-wrong").textContent = wrong;
+  $("#res-skip").textContent = skip;
+  $("#res-time").textContent = timeStr;
+
+  const band = grade(pct);
+  const b=$("#res-band"); b.textContent=band.label;
+  b.style.background=band.soft; b.style.color=band.ink;
+  $("#ring").style.setProperty("background","conic-gradient("+band.ink+" calc(var(--p)*1%), #e2e8f2 0)");
+
+  buildReview();
+  saveResult({ name:student.name, roll:student.roll, correct, total, pct, timeStr,
+               date:new Date().toISOString() });
+  show("#s-result");
+}
+function grade(p){
+  if(p>=90) return {label:"Excellent",ink:"#1f9d67",soft:"#e3f5ec"};
+  if(p>=75) return {label:"Very good",ink:"#2563a8",soft:"#e7f0fa"};
+  if(p>=60) return {label:"Good",ink:"#c9962a",soft:"#fef4dd"};
+  if(p>=40) return {label:"Pass",ink:"#b8842a",soft:"#fdf1d8"};
+  return {label:"Needs improvement",ink:"#d84c46",soft:"#fbe8e7"};
+}
+
+let reviewFilter="all";
+function buildReview(){
+  const list=$("#review-list");
+  list.innerHTML = quiz.map((q,i)=>{
+    const status = q.selected===null ? "skip" : (q.opts[q.selected].correct?"ok":"no");
+    const correctIdx = q.opts.findIndex(o=>o.correct);
+    const codeBlock = q.code ? '<pre class="code">'+highlight(q.code)+'</pre>' : '';
+    const badge = status==="ok" ? '<span class="rev-badge ok">Correct</span>'
+      : status==="no" ? '<span class="rev-badge no">Incorrect</span>'
+      : '<span class="rev-badge skip">Not answered</span>';
+    let yourLine="";
+    if(q.selected!==null){
+      const good=q.opts[q.selected].correct;
+      yourLine='<div class="rev-ans"><span class="lab">Your answer: </span>'+
+        '<span class="yours '+(good?"good":"bad")+'">'+KEYS[q.selected]+'. '+optHTML(q.opts[q.selected].text)+'</span></div>';
+    } else {
+      yourLine='<div class="rev-ans"><span class="lab">Your answer: </span><span class="yours bad">— skipped</span></div>';
+    }
+    const rightLine = '<div class="rev-ans"><span class="lab">Correct answer: </span>'+
+        '<span class="right">'+KEYS[correctIdx]+'. '+optHTML(q.opts[correctIdx].text)+'</span></div>';
+    return '<div class="rev-item '+status+'" data-s="'+status+'">'+
+      '<div class="rev-top">'+badge+
+        '<span class="tag topic">'+esc(q.topic)+'</span>'+
+        '<span class="qnum" style="margin-left:auto">Q'+(i+1)+'</span></div>'+
+      '<div class="rev-q">'+esc(q.question)+'</div>'+ codeBlock +
+      yourLine + (status==="ok"?"":rightLine) +
+      '<div class="expl"><b>Why</b><br>'+esc(q.explanation)+'</div>'+
+    '</div>';
+  }).join("");
+  applyFilter();
+}
+$$(".filterbtn").forEach(b=>b.addEventListener("click",()=>{
+  $$(".filterbtn").forEach(x=>x.classList.remove("on")); b.classList.add("on");
+  reviewFilter=b.dataset.f; applyFilter();
+}));
+function applyFilter(){
+  $$("#review-list .rev-item").forEach(it=>{
+    it.style.display = (reviewFilter==="all"||it.dataset.s===reviewFilter)?"block":"none";
+  });
+}
+$("#btn-retake").addEventListener("click", ()=>location.reload());
+
+/* ======================= STORAGE (results) ======================= */
+async function saveResult(r){
+  if(!window.storage){ return; }        // graceful: quiz still works without it
+  try{
+    const key = "result:"+Date.now()+"-"+Math.random().toString(36).slice(2,7);
+    await window.storage.set(key, JSON.stringify(r), true);   // shared = teacher can aggregate
+  }catch(e){ /* ignore save errors */ }
+}
+
+/* ======================= INSTRUCTOR ======================= */
+$("#btn-unlock").addEventListener("click", unlock);
+$("#in-pass").addEventListener("keydown", e=>{ if(e.key==="Enter") unlock(); });
+function unlock(){
+  if($("#in-pass").value === CONFIG.INSTRUCTOR_PASSCODE){
+    $("#f-pass").classList.remove("err");
+    $("#gate").style.display="none"; $("#dash").style.display="block";
+    loadResults();
+  } else { $("#f-pass").classList.add("err"); }
+}
+$("#in-pass").addEventListener("input",()=>$("#f-pass").classList.remove("err"));
+$("#btn-back-home").addEventListener("click",()=>show("#s-welcome"));
+$("#btn-back-home2").addEventListener("click",()=>show("#s-welcome"));
+$("#btn-refresh").addEventListener("click", loadResults);
+
+let cachedResults=[];
+async function loadResults(){
+  const tbl=$("#results-table"), sum=$("#summary");
+  if(!window.storage){
+    tbl.innerHTML='<div class="empty">Result collection needs the shared-storage environment (the live shared link). '+
+      'Students still see their own scores instantly; this dashboard fills up once results are saved to the shared link.</div>';
+    sum.innerHTML=""; return;
+  }
+  tbl.innerHTML='<div class="empty">Loading…</div>';
+  try{
+    const listing = await window.storage.list("result:", true);
+    const keys = (listing && listing.keys) ? listing.keys : [];
+    const rows=[];
+    for(const k of keys){
+      try{ const rec=await window.storage.get(k,true); if(rec&&rec.value) rows.push(JSON.parse(rec.value)); }catch(e){}
+    }
+    cachedResults = rows.sort((a,b)=> new Date(b.date)-new Date(a.date));
+    paintResults();
+  }catch(e){
+    tbl.innerHTML='<div class="empty">Could not load results right now.</div>'; sum.innerHTML="";
+  }
+}
+function paintResults(){
+  const tbl=$("#results-table"), sum=$("#summary");
+  if(cachedResults.length===0){
+    tbl.innerHTML='<div class="empty">No submissions yet. Results appear here after students submit the test.</div>';
+    sum.innerHTML=""; return;
+  }
+  const n=cachedResults.length;
+  const avg=Math.round(cachedResults.reduce((s,r)=>s+r.pct,0)/n);
+  const top=Math.max(...cachedResults.map(r=>r.pct));
+  sum.innerHTML =
+    '<div class="stat"><div class="n">'+n+'</div><div class="l">Submissions</div></div>'+
+    '<div class="stat"><div class="n">'+avg+'%</div><div class="l">Average score</div></div>'+
+    '<div class="stat"><div class="n">'+top+'%</div><div class="l">Highest score</div></div>';
+  const body = cachedResults.map(r=>{
+    const d=new Date(r.date);
+    const when=d.toLocaleDateString()+" "+d.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+    const col = r.pct>=75?"var(--green)":r.pct>=40?"var(--yellow-deep)":"var(--red)";
+    return '<tr><td>'+esc(r.name)+'</td><td>'+esc(r.roll||"—")+'</td>'+
+      '<td class="sc" style="color:'+col+'">'+r.pct+'%</td>'+
+      '<td>'+r.correct+' / '+r.total+'</td><td>'+esc(r.timeStr)+'</td><td>'+esc(when)+'</td></tr>';
+  }).join("");
+  tbl.innerHTML='<table class="results"><thead><tr>'+
+    '<th>Name</th><th>Roll / ID</th><th>Score</th><th>Correct</th><th>Time</th><th>Submitted</th>'+
+    '</tr></thead><tbody>'+body+'</tbody></table>';
+}
+$("#btn-csv").addEventListener("click", ()=>{
+  if(!cachedResults.length){ alert("No results to export yet."); return; }
+  const head=["Name","Roll/ID","Percent","Correct","Total","Time","Submitted"];
+  const rows=cachedResults.map(r=>[r.name,r.roll||"",r.pct,r.correct,r.total,r.timeStr,r.date]);
+  const csv=[head,...rows].map(row=>row.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(",")).join("\n");
+  const blob=new Blob([csv],{type:"text/csv"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob); a.download="python_test_results.csv"; a.click();
+});
+</script>
+</body>
+</html>
