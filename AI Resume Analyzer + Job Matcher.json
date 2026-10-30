@@ -1,0 +1,242 @@
+{
+  "name": "AI Resume Analyzer + Job Matcher",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "resume-upload",
+        "options": {
+          "binaryPropertyName": "resume"
+        }
+      },
+      "id": "0058ac65-0193-4020-a319-20206894c07f",
+      "name": "Resume Upload Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        400
+      ],
+      "webhookId": "0a5d399e-a0b1-4c83-810d-8bf676a1f833"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "resume0",
+        "options": {
+          "joinPages": true
+        }
+      },
+      "id": "8393224f-7355-44b3-addf-e295a7362686",
+      "name": "Extract Resume Text",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        464,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert resume analyzer.\n\nAnalyze the resume text below and extract structured information.\n\nResume:\n{{ $json.text }}\n\nReturn ONLY valid JSON. Do not include any explanation or extra text.\n\nUse this exact format:\n\n{\n  \"skills\": [\"string\"],\n  \"experience_years\": number,\n  \"job_titles\": [\"string\"],\n  \"education_level\": \"string\",\n  \"key_strengths\": [\"string\"],\n  \"summary\": \"string\"\n}\n\nRules:\n- Skills must be a list of technical and relevant skills\n- experience_years must be a number (estimate if not explicitly mentioned)\n- job_titles must include roles mentioned in the resume\n- education_level should be like: \"Bachelor\", \"Master\", \"PhD\", etc.\n- key_strengths should be 3–6 strong qualities\n- summary should be 2–3 lines maximum\n- If any field is missing, return an empty array [] or null (for numbers)",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an expert resume analyzer. Extract structured information from resumes accurately and concisely."
+        }
+      },
+      "id": "624998d9-8733-4ba9-a1d2-a79aeabae0e7",
+      "name": "Analyze Resume",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        688,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"skills\": [\"JavaScript\", \"Python\", \"React\"],\n  \"experience_years\": 5,\n  \"job_titles\": [\"Senior Developer\", \"Software Engineer\"],\n  \"education_level\": \"Bachelor\",\n  \"key_strengths\": [\"Team leadership\", \"Microservices architecture\", \"DevOps\"],\n  \"summary\": \"Experienced software engineer with strong full-stack and cloud skills\",\n  \"score\": 88,\n  \"recommended_roles\": [\"Full Stack Developer\", \"Backend Engineer\", \"Tech Lead\"],\n  \"skill_category\": {\n    \"frontend\": [\"React\", \"JavaScript\"],\n    \"backend\": [\"Python\"],\n    \"devops\": [\"Docker\", \"CI/CD\"]\n  }\n}"
+      },
+      "id": "72d08c95-1ab5-402d-b81a-f7ef903175f3",
+      "name": "Resume Analysis Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        824,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://remotive.com/api/remote-jobs",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "3beb2ce2-d915-4f8f-8dbc-2a4ac5e774d3",
+      "name": "Fetch Job Listings",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1040,
+        400
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get resume analysis safely\nconst resumeData = $input.first().json.output || {};\nconst candidateSkills = (resumeData.skills || []).map(s => s.toLowerCase());\nconst candidateYears = resumeData.experience_years || 0;\n\n// Get jobs safely\nconst jobs = $('Fetch Job Listings').first().json.jobs || [];\n\nconst rankedJobs = jobs.map(job => {\n  let score = 0;\n\n  // ---- SKILL MATCHING (70 pts) ----\n  const jobSkills = (job.required_skills || []).map(s => s.toLowerCase());\n\n  let matchingSkills = [];\n  if (jobSkills.length > 0) {\n    matchingSkills = jobSkills.filter(skill =>\n      candidateSkills.some(cs => cs.includes(skill) || skill.includes(cs))\n    );\n\n    const skillScore = (matchingSkills.length / jobSkills.length) * 70;\n    score += skillScore;\n  }\n\n  // ---- EXPERIENCE MATCHING (30 pts) ----\n  let expText = job.experience_required || \"\";\n  let numbers = expText.match(/\\d+/g);\n\n  if (numbers) {\n    const minExp = parseInt(numbers[0]);\n    const maxExp = numbers.length > 1 ? parseInt(numbers[1]) : minExp + 2;\n\n    if (candidateYears >= minExp && candidateYears <= maxExp + 1) {\n      score += 30;\n    } else if (candidateYears >= minExp - 1) {\n      score += 15;\n    }\n  }\n\n  // ---- FINAL OBJECT ----\n  return {\n    ...job,\n    match_score: Math.round(score),\n    matching_skills: matchingSkills,\n    missing_skills: jobSkills.filter(s => !matchingSkills.includes(s))\n  };\n});\n\n// ---- SORT + TOP MATCHES ----\nconst topMatches = rankedJobs\n  .sort((a, b) => b.match_score - a.match_score)\n  .slice(0, 3);\n\n// ---- FINAL OUTPUT ----\nreturn [{\n  json: {\n    candidate_name: $('Resume Upload Webhook').first().json.body.candidateName || \"Unknown\",\n    candidate_email: $('Resume Upload Webhook').first().json.body.email || \"N/A\",\n    resume_summary: resumeData.summary || \"\",\n    top_matches: topMatches,\n    total_jobs_analyzed: jobs.length\n  }\n}];"
+      },
+      "id": "bc7c0e0f-5290-4104-bc24-0a4dd0bea091",
+      "name": "Rank Job Matches",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.candidate_email }}",
+        "subject": "=Your Top Job Matches - {{ $json.candidate_name }}",
+        "message": "={{ \n(() => {\n\nconst candidate = $json;\n\nconst getScoreColor = (score) => {\n  if (score >= 75) return \"#16a34a\";   // green\n  if (score >= 50) return \"#f59e0b\";   // orange\n  return \"#dc2626\";                    // red\n};\n\nconst jobsHTML = (candidate.top_matches || []).map((job, i) => {\n  const color = getScoreColor(job.match_score || 0);\n\n  return `\n  <div style=\"margin-bottom:20px;padding:20px;border-radius:10px;border:1px solid #e5e7eb;background:#ffffff;\">\n    \n    <h3 style=\"margin:0 0 10px 0;\">\n      ${i + 1}. ${job.title || \"Untitled Role\"}\n    </h3>\n\n    <p><strong>🏢 Company:</strong> ${job.company_name || \"N/A\"}</p>\n    <p><strong>📍 Location:</strong> ${job.candidate_required_location || \"Remote\"}</p>\n    <p><strong>💰 Salary:</strong> ${job.salary || \"Not disclosed\"}</p>\n\n    <p>\n      <strong>🎯 Match Score:</strong> \n      <span style=\"color:${color}; font-weight:bold;\">\n        ${job.match_score || 0}%\n      </span>\n    </p>\n\n    <p><strong>✅ Matching Skills:</strong> \n      ${(job.matching_skills && job.matching_skills.length)\n        ? job.matching_skills.join(\", \")\n        : \"None\"}\n    </p>\n\n    <p><strong>⚠️ Missing Skills:</strong> \n      ${(job.missing_skills && job.missing_skills.length)\n        ? job.missing_skills.join(\", \")\n        : \"Not specified\"}\n    </p>\n\n    <a href=\"${job.url}\" target=\"_blank\"\n       style=\"display:inline-block;margin-top:10px;padding:10px 15px;background:#0073b1;color:#fff;text-decoration:none;border-radius:6px;\">\n       🔗 View Job\n    </a>\n\n  </div>\n  `;\n}).join(\"\");\n\n// FINAL TEMPLATE\nreturn `\n<div style=\"font-family:Arial, sans-serif; max-width:700px; margin:auto; background:#f9fafb; padding:25px; border-radius:10px;\">\n\n  <h2 style=\"text-align:center; color:#111827;\">\n    🚀 Your Job Matches Report\n  </h2>\n\n  <p><strong>👤 Name:</strong> ${candidate.candidate_name || \"Candidate\"}</p>\n  <p><strong>📧 Email:</strong> ${candidate.candidate_email}</p>\n\n  <div style=\"margin:20px 0; padding:15px; background:#ffffff; border-radius:8px;\">\n    <h3>🧠 Resume Summary</h3>\n    <p>${candidate.resume_summary || \"No summary available\"}</p>\n  </div>\n\n  <h3>🎯 Top Job Matches</h3>\n\n  ${jobsHTML || \"<p>No matching jobs found.</p>\"}\n\n  <div style=\"margin-top:30px; font-size:12px; color:#6b7280; text-align:center;\">\n    🔍 Jobs analyzed: ${candidate.total_jobs_analyzed || 0}\n  </div>\n\n</div>\n`;\n\n})()\n}}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "443956dd-68e2-4c21-b655-6ad04c4e67f8",
+      "name": "Email Job Recommendations",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1488,
+        400
+      ],
+      "webhookId": "250c6e60-2b18-4b6f-9166-ec24b427edd9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "QMxDzP4hmnLNosQW",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        528,
+        720
+      ],
+      "id": "b58d3851-f781-47ee-b2b9-d2ed19d9cc35",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "6mfe5uWgmIhjRimV",
+          "name": "Groq account 3"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Resume Upload Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Resume Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Resume Text": {
+      "main": [
+        [
+          {
+            "node": "Analyze Resume",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Resume": {
+      "main": [
+        [
+          {
+            "node": "Fetch Job Listings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resume Analysis Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Analyze Resume",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Job Listings": {
+      "main": [
+        [
+          {
+            "node": "Rank Job Matches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rank Job Matches": {
+      "main": [
+        [
+          {
+            "node": "Email Job Recommendations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analyze Resume",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "dfccff3e-d40e-44b5-9c74-138cb18c6344",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "55d621006124db1f302354fad7546d58172dbc17f1a939a960f0c18aa10b284e"
+  },
+  "id": "KHlb0aRZteZJplAz",
+  "tags": []
+}
